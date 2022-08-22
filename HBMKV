@@ -1,0 +1,139 @@
+#set -x
+InputFile=$1
+Bitrate=$2
+SubStream=$3
+BaseDir=/mnt/StorPool/convert
+New_Filename=$(echo $InputFile | rev | cut -c5- | rev)
+#OutputFile=$New_Filename.$Bitrate.mkv
+
+#### NOTE
+# to keep surround sound
+# docker run --rm \
+# -v /media/wrkspc/hb_input:/input \
+# -v /media/wrkspc/hb_output:/output \
+# supercoder/docker-handbrake-cli \
+# -i /input/The.Dark.Tower.2017.BluRay.mkv \
+# -o /output/The.Dark.Tower.2017.720p.BluRay.mkv \
+# -e x264 \
+# -f av_mkv \
+# -Z "H.264 MKV 720p30" \
+# -b 2048 \
+# -s 1 \ # this line specifies subtitle track 1
+# -E copy:ac3 \ $ this line specifies to copy the ac3 track from source
+# --keep-display-aspect
+
+# similar encode options to old videoseed guidelines for 768kbps and 1408kbps 640x encodes
+#export ENC_OPTS_768="-e x264 -f av_mkv -Z \"H.264 MKV 480p30\" -b 768 -E faac -6 stereo -B 160 -D 1.5 -X 640 --keep-display-aspect"
+#export ENC_OPTS_1408="-e x264 -f av_mkv -Z \"H.264 MKV 480p30\" -b 1408 -E faac -6 stereo -B 160 -D 1.5 -X 640 --keep-display-aspect"
+
+# 720p HD encodes similar to old videoseed 2048 encodes
+#export ENC_OPTS_HD_SUBS="-e x264 -f av_mkv -Z \"H.264 MKV 720p30\" -b 2048 -s $SubStream -E faac -6 stereo -B 160 -D 1.5 --keep-display-aspect" # subtitle track 2 internal to file
+#export ENC_OPTS_HD_NoSUBS="-e x264 -f av_mkv -Z \"H.264 MKV 720p30\" -b 2048 -E faac -6 stereo -B 160 -D 1.5 --keep-display-aspect"
+
+case $Bitrate
+	in
+	768|1408|1408S ) OutputFile=$New_Filename.SD.mkv ;;
+	2048|2048S|1408M ) OutputFile=$New_Filename.720p.mkv ;;
+esac
+
+case $Bitrate
+	in
+	768 ) docker run --rm \
+		-v $BaseDir/input:/input \
+		-v $BaseDir/output:/output \
+		supercoder/docker-handbrake-cli \
+		-i /input/$InputFile \
+		-o /output/$OutputFile \
+		-e x264 \
+		-f av_mkv \
+		-Z "H.264 MKV 480p30" \
+		-b 768 \
+		-E faac \
+		-6 stereo \
+		-B 160 \
+		-D 1.5 \
+		-X 640 \
+		--keep-display-aspect ;;
+	1408 ) docker run --rm \
+		-v $BaseDir/input:/input \
+		-v $BaseDir/output:/output \
+		supercoder/docker-handbrake-cli \
+		-i /input/$InputFile \
+		-o /output/$OutputFile \
+		-e x264 \
+		-f av_mkv \
+		-Z "H.264 MKV 480p30" \
+		-b 1408 \
+		-E faac \
+		-6 stereo \
+		-B 160 \
+		-D 1.5 \
+		-X 640 \
+		--keep-display-aspect ;;
+        1408S ) docker run --rm \
+                -v $BaseDir/input:/input \
+                -v $BaseDir/output:/output \
+                supercoder/docker-handbrake-cli \
+                -i /input/$InputFile \
+                -o /output/$OutputFile \
+                -e x264 \
+                -f av_mkv \
+                -Z "H.264 MKV 480p30" \
+                -b 1408 \
+		-s $SubStream \
+                -E faac \
+                -6 stereo \
+                -B 160 \
+                -D 1.5 \
+                -X 640 \
+                --keep-display-aspect ;;
+	1408M ) docker run --rm \
+		-v $BaseDir/input:/input \
+		-v $BaseDir/output:/output \
+		supercoder/docker-handbrake-cli \
+		-i /input/$InputFile \
+		-o /output/$OutputFile \
+		-e x264 \
+		-f av_mkv \
+		-Z "H.264 MKV 720p30" \
+		-b 1408 \
+		-E faac \
+		-6 stereo \
+		-B 160 \
+		-D 1.5 \
+		-X 1280 \
+		--keep-display-aspect ;;
+	2048 ) docker run --rm \
+		-v $BaseDir/input:/input \
+		-v $BaseDir/output:/output \
+		supercoder/docker-handbrake-cli \
+		-i /input/$InputFile \
+		-o /output/$OutputFile \
+		-e x264 \
+		-f av_mkv \
+		-Z "H.264 MKV 720p30" \
+		-b 2048 \
+		-E faac \
+		-6 stereo \
+		-B 160 \
+		-D 1.5 \
+		-X 1280 \
+		--keep-display-aspect ;;
+	2048S ) docker run --rm \
+		-v $BaseDir/input:/input \
+		-v $BaseDir/output:/output \
+		supercoder/docker-handbrake-cli \
+		-i /input/$InputFile \
+		-o /output/$OutputFile \
+		-e x264 -f av_mkv -Z "H.264 MKV720p30" \
+		-b 2048 \
+		-s $SubStream \
+		-E faac \
+		-6 stereo \
+		-B 160 \
+		-D 1.5 \
+		-X 1280 \
+		--keep-display-aspect;;
+esac
+
+
